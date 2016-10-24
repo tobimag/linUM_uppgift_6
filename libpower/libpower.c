@@ -1,3 +1,5 @@
+#include "libpower.h"
+
 float calc_power_r(float volt, float resistance){
     return volt*volt/resistance;
 }
