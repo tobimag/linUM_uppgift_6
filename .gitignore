@@ -31,3 +31,9 @@
 # Debug files
 *.dSYM/
 *.su
+
+# Temp files
+*.*~
+
+# Build folder
+*/build/*
