@@ -5,14 +5,14 @@
 
 const int NB_OF_RESISTORS = 3;
 
-void print_result(int count, float *res_array)
+void print_result(const int count, const float *res_array)
 {
-  printf("Resistors from E12-series: ");
+  printf("Used %d resistors: ", count);
   int i;
-  for(i = 0; i < NB_OF_RESISTORS; ++i)
+  for(i = 0; i < count; ++i)
     {
       printf("%.1f", res_array[i]);
-      if(i < NB_OF_RESISTORS - 1)
+      if(i < count - 1)
 	printf(", ");
     }
   printf("\n");
@@ -21,7 +21,7 @@ void print_result(int count, float *res_array)
 int main(void)
 {
   float res_array[NB_OF_RESISTORS];
-  const float orig_resistance = 1398;
+  const float orig_resistance = 1380;
   int count = 0;
 
   count = e_resistance(orig_resistance, res_array);
