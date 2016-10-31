@@ -5,6 +5,7 @@
 
 # Compiler settings
 CC = gcc
+DEBUG = 0
 
 # Commands
 MAKE_DIR = @mkdir -p
@@ -16,7 +17,7 @@ COMPONENT_LIB_LINKER_DIRECTIV = -$(patsubst lib%,l%,$(patsubst %.so,%,$(SHARED_L
 
 # Name of source files
 TEST_COMPONENT_SRC_NAME = test_component.c
-COMPONENT_SRC_NAME = component.c
+COMPONENT_SRC_NAME = libcomponent.c
 
 # Raw paths
 SRC = src
@@ -30,6 +31,11 @@ TEST_COMPONENT_BIN = $(BUILD)/$(TEST_BIN_NAME)
 TEST_COMPONENT_SRC = $(SRC)/$(TEST_COMPONENT_SRC_NAME)
 TEST_COMPONENT_OBJ = $(patsubst $(SRC)/%.c, $(BUILD)/%.o, $(TEST_COMPONENT_SRC))
 
+# C flags
+CFLAGS = -fpic -shared
+SHARED_LIB_FLAGS = -L$(BUILD) -Wl,-rpath,.
+DEBUG_FLAG = -DDEBUG=$(DEBUG)
+
 # Make shared lib
 lib : $(COMPONENT_SHARED_LIB)
 
@@ -38,16 +44,16 @@ test : $(TEST_COMPONENT_BIN)
 
 # Make exeutable test from object file and shared library
 $(TEST_COMPONENT_BIN) : $(TEST_COMPONENT_OBJ) $(COMPONENT_SHARED_LIB)
-	$(CC) -L$(BUILD) -Wl,-rpath,. -o $(TEST_COMPONENT_BIN) $< $(COMPONENT_LIB_LINKER_DIRECTIV) -lm
+	$(CC) $(SHARED_LIB_FLAGS) -o $(TEST_COMPONENT_BIN) $< $(COMPONENT_LIB_LINKER_DIRECTIV) -lm
 
 # Make shared lib from object file
 $(COMPONENT_SHARED_LIB) : $(COMPONENT_OBJ)
-	$(CC) -shared -o $(COMPONENT_SHARED_LIB) $^
+	$(CC) $(CFLAGS) -o $(COMPONENT_SHARED_LIB) $^
 
 # Compile library source files into object file
 $(COMPONENT_OBJ) : $(COMPONENT_SRC)
 	$(MAKE_DIR) $(BUILD)
-	$(CC) -c -fpic $^ -o $@
+	$(CC) -c $(CFLAGS) $(DEBUG_FLAG) $^ -o $@
 
 # Compile test source file into object file
 $(TEST_COMPONENT_OBJ): $(TEST_COMPONENT_SRC)

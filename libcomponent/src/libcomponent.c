@@ -1,9 +1,15 @@
-/* component.c */
+/* libcomponent.c */
 
 #include <math.h>
 #include <stdio.h>
 
-#include "component.h"
+#include "libcomponent.h"
+
+#if DEBUG
+#define DEBUG_PRINT(f_, ...) printf((f_), __VA_ARGS__)
+#else
+#define DEBUG_PRINT
+#endif
 
 const int e12_resistor_table_size = 12;
 const float e12_resistor_table[12] = {1, 1.2, 1.5, 1.8, 2.2, 2.7, 3.3, 3.9, 4.7, 5.6, 6.8, 8.2};
@@ -36,8 +42,7 @@ static int find_candidates(const float resistance, float* left_candidate, float*
     {
       e12_resistor = get_e12_resistor_value(i, scale);
       relative_error = (e12_resistor - resistance)/resistance;
-      printf("Resistor: %f | Error: %f\n", e12_resistor, relative_error);
-
+      DEBUG_PRINT("Resistor: %f | Error: %f\n", e12_resistor, relative_error);
       // We found something close
       if(fabs(relative_error) < tolerance)
 	{
@@ -97,16 +102,20 @@ static int calc_e12_values(const float resistance, float *e12_values, const int 
   else if (result == 1)
     {
       int used_resistors;
+      // Do we want to continue in a new tree?
       if(nb_of_resistors - 1 > 0)
 	{
 	  const float remaining_resistance = fabs(resistance - left_candidate);
-	  printf("Creating new tree with start resistance: %f \n", remaining_resistance);
+	  DEBUG_PRINT("Creating new tree with start resistance: %f \n", remaining_resistance);
+	  // Create new tree with rest of array and remaining resistance
 	  used_resistors = calc_e12_values(remaining_resistance, &(e12_values[1]), nb_of_resistors-1);
 	}
 
+      // Sum up resistance in left tree include this candidate
       float total_resistance_left_tree = left_candidate + sum_resistance(&(e12_values[1]), nb_of_resistors-1);
-      printf("Total resistance of left tree is: %f \n", total_resistance_left_tree);
+      DEBUG_PRINT("Total resistance of left tree is: %f \n", total_resistance_left_tree);
 
+      // Choose candidate
       if(total_resistance_left_tree < right_candidate)
 	{
 	  e12_values[0] = left_candidate;

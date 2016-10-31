@@ -1,7 +1,7 @@
-/* component.h */
+/* libcomponent.h */
 
-#ifndef _COMPONENT_H_
-#define _COMPONENT_H_
+#ifndef _LIBCOMPONENT_H_
+#define _LIBCOMPONENT_H_
 
 int e_resistance(const float orig_resistance, float *res_array);
 
