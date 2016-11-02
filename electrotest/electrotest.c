@@ -31,13 +31,12 @@ int main(){
 
   printf("Effekt %.2f W\n", calc_power_r(volt, orig_resistance ));
 
-  printf("Ersättningsresistanser i E12-serien kopplade ");
-  conn== 'S'? printf("i serie:\n"): printf("parallellt:\n");
+  printf("Ersättningsresistanser i E12-serien kopplade i serie:\n");
   float res_array[2];
   e_resistance(orig_resistance, res_array);
   for(int i= 0; i< 3; i++)
     if(res_array[i] != 0)
-	printf("%f\n ", res_array[i]);
+	printf("%.1f\n ", res_array[i]);
 
   return 0;
 }
