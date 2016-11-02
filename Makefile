@@ -9,6 +9,7 @@ MAKE_DIR = @mkdir -p
 SRC = src
 BUILD = build
 LIB = lib
+BIN = bin
 
 # Lib Resistance definitions
 LIB_RESISTANCE_PATH = ./libresistance
@@ -25,6 +26,11 @@ LIB_COMPONENT_PATH = ./libcomponent/$(SRC)
 LIB_COMPONENT_SO = libcomponent.so
 LIB_COMPONENT_SRC = libcomponent.c
 
+# Electrotest definitions
+ELECTROTEST_PATH = ./electrotest
+ELECTROTEST_SRC = electrotest.c
+ELECTROTEST_BIN = electrotest
+
 # Other definitions
 LIB_RESISTANCE_OBJ = $(LIB_RESISTANCE_SRC:.c=.o)
 
@@ -36,3 +42,7 @@ lib : $(LIB_RESISTANCE_SO) $(LIB_POWER_SO) $(LIB_COMPONENT_SO)
 	$(MAKE_DIR) $(BUILD) $(LIB)
 	$(CC) -c $(CFLAGS) -fpic -o $(BUILD)/$(*:.c=.o) $^
 	$(CC) $(CFLAGS) -shared -o $(LIB)/$@ $(BUILD)/$(*:.c=.o)
+
+all : $(LIB_RESISTANCE_SO) $(LIB_POWER_SO) $(LIB_COMPONENT_SO)
+	$(MAKE_DIR) $(BIN)
+	$(CC) $(CFLAGS) -L$(LIB) -Wl,-rpath,../$(LIB) -o $(BIN)/$(ELECTROTEST_BIN) $(ELECTROTEST_PATH)/$(ELECTROTEST_SRC) -lresistance -lcomponent -lpower -lm
