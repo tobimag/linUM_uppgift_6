@@ -32,21 +32,25 @@ ELECTROTEST_SRC = electrotest.c
 ELECTROTEST_BIN = electrotest
 ELECTROTEST_OBJ = electrotest.o
 
-# Other definitions
-LIB_RESISTANCE_OBJ = $(LIB_RESISTANCE_SRC:.c=.o)
-
-VPATH = $(LIB_RESISTANCE_PATH):$(LIB_POWER_PATH):$(LIB_COMPONENT_PATH)
+VPATH = $(LIB) $(LIB_RESISTANCE_PATH) $(LIB_POWER_PATH) $(LIB_COMPONENT_PATH) $(ELECTROTEST_PATH) $(BUILD) $(BIN)
 
 lib : $(LIB_RESISTANCE_SO) $(LIB_POWER_SO) $(LIB_COMPONENT_SO)
+
+all : $(LIB_RESISTANCE_SO) $(LIB_POWER_SO) $(LIB_COMPONENT_SO) $(ELECTROTEST_OBJ)
+
+.PHONEY : clean
+clean:
+	rm -rf $(BUILD) $(BIN) $(LIB)
 
 %.so : %.c
 	$(MAKE_DIR) $(BUILD) $(LIB)
 	$(CC) -c $(CFLAGS) -fpic -o $(BUILD)/$(*:.c=.o) $^
 	$(CC) $(CFLAGS) -shared -o $(LIB)/$@ $(BUILD)/$(*:.c=.o)
 
-all : $(LIB_RESISTANCE_SO) $(LIB_POWER_SO) $(LIB_COMPONENT_SO) $(ELECTROTEST_SRC)
+$(ELECTROTEST_BIN) : $(ELECTROTEST_OBJ)
 	$(MAKE_DIR) $(BIN)
-	$(CC) $(CFLAGS) -L$(LIB) -Wl,-rpath,../$(LIB) -o $(BIN)/$(ELECTROTEST_BIN) $(BUILD)/$(ELECTROTEST_OBJ) -lresistance -lcomponent -lpower -lm
+	$(CC) $(CFLAGS) -L$(LIB) -Wl,-rpath,../$(LIB) -o $(BIN)/$(ELECTROTEST_BIN) $(BUILD)/$(ELECTROTEST_OBJ) -lresistance -lcomponent -lpower -lm	
 
-$(ELECTROTEST_SRC) :
-	$(CC) -c $(CFLAGS) -fpic $(ELECTROTEST_PATH)/$(ELECTROTEST_SRC) -o $(BUILD)/$(ELECTROTEST_OBJ)
+$(ELECTROTEST_OBJ) : $(ELECTROTEST_SRC)
+	$(MAKE_DIR) $(BUILD)
+	$(CC) -c $(CFLAGS) -fpic $^ -o $(BUILD)/$@
