@@ -1,7 +1,7 @@
-/* test_component.c */
+/* test_libcomponent.c */
 
 #include <stdio.h>
-#include "component.h"
+#include "libcomponent.h"
 
 const int NB_OF_RESISTORS = 3;
 
@@ -18,10 +18,16 @@ void print_result(const int count, const float *res_array)
   printf("\n");
 }
 
-int main(void)
+int main(int argc, char* argv[])
 {
+  if(argc != 2)
+    {
+      printf("Usage: %s <Resistance>\n", argv[0]);
+      return 1;
+    }
   float res_array[NB_OF_RESISTORS];
-  const float orig_resistance = 1380;
+  float orig_resistance;
+  sscanf(argv[1],"%f", &orig_resistance);
   int count = 0;
 
   count = e_resistance(orig_resistance, res_array);

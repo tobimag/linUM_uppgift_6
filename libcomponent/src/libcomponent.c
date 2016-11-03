@@ -34,10 +34,9 @@ static int get_e12_resistor_value(const int index, const int scale)
 
 static int find_candidates(const float resistance, float* left_candidate, float* right_candidate)
 {
-  
   const float scale = calculate_scaling(resistance);
+  float e12_resistor = 0, relative_error = 0;
   int i;
-  float e12_resistor, relative_error;
   for(i = 0; i < e12_resistor_table_size; ++i)
     {
       e12_resistor = get_e12_resistor_value(i, scale);
@@ -75,33 +74,37 @@ static int find_candidates(const float resistance, float* left_candidate, float*
 
 static float sum_resistance(const float *e12_values, const int nb_of_resistors)
 {
-  float total_resistance;
+  float total_resistance = 0;
   int node;
   for(node = 0; node < nb_of_resistors; ++node)
     {
+      DEBUG_PRINT("Adding %f to total resistance\n", e12_values[node]);
       total_resistance += e12_values[node];
     }
+  DEBUG_PRINT("Total resistance in tree: %f\n", total_resistance);
   return total_resistance;
 }
 
 static int calc_e12_values(const float resistance, float *e12_values, const int nb_of_resistors)
 {
+  DEBUG_PRINT("Resistance: %f, Reistors to use: %d\n", resistance, nb_of_resistors);
   const float scale = calculate_scaling(resistance);
 
-  float left_candidate, right_candidate;
-  int result;
-  result = find_candidates(resistance, &left_candidate, &right_candidate);
+  float left_candidate = 0, right_candidate = 0;
+  const int result = find_candidates(resistance, &left_candidate, &right_candidate);
+  DEBUG_PRINT("Left candidate: %f, Right candidate: %f\n", left_candidate, right_candidate);
   
   // Seems as if we hit an exact match
   if(result == 0)
     {
       e12_values[0] = left_candidate;
+      DEBUG_PRINT("Exact match! Chose left candidate: %f\n", e12_values[0]);
       return 1;
     }
   // Still some work to do
   else if (result == 1)
     {
-      int used_resistors;
+      int used_resistors = 0;
       // Do we want to continue in a new tree?
       if(nb_of_resistors - 1 > 0)
 	{
@@ -112,17 +115,22 @@ static int calc_e12_values(const float resistance, float *e12_values, const int 
 	}
 
       // Sum up resistance in left tree include this candidate
-      float total_resistance_left_tree = left_candidate + sum_resistance(&(e12_values[1]), nb_of_resistors-1);
+      const float total_resistance_left_tree = left_candidate + sum_resistance(&(e12_values[1]), nb_of_resistors-1);
       DEBUG_PRINT("Total resistance of left tree is: %f \n", total_resistance_left_tree);
-
+     
       // Choose candidate
-      if(total_resistance_left_tree < right_candidate)
+      const float left_tree_diff = fabs(total_resistance_left_tree - resistance);
+      const float right_tree_diff = fabs(right_candidate - resistance);
+      DEBUG_PRINT("Left tree diff: %f | Right tree diff: %f\n", left_tree_diff, right_tree_diff);
+      if(left_tree_diff < right_tree_diff)
 	{
 	  e12_values[0] = left_candidate;
+	  DEBUG_PRINT("Chose left candidate: %f\n", left_candidate);
 	}
       else
 	{
 	  e12_values[0] = right_candidate;
+	  DEBUG_PRINT("Chose right candidate: %f\n", right_candidate);
 	}
       return used_resistors + 1;
     }
