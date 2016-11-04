@@ -15,21 +15,28 @@ const int e12_resistor_table_size = 12;
 const float e12_resistor_table[12] = {1, 1.2, 1.5, 1.8, 2.2, 2.7, 3.3, 3.9, 4.7, 5.6, 6.8, 8.2};
 const float tolerance = 0.1;
 
-static int calculate_scaling(const float resistance)
+static float calculate_scaling(const float resistance)
 {
   const float exponent = floorf(log10f(resistance));
   const float scale = powf(10.0, exponent);
+  DEBUG_PRINT("Scale is %f\n", scale);
   return scale;
 }
 
-static int get_e12_resistor_value(const int index, const int scale)
+static float get_e12_resistor_value(const int index, const float scale)
 {
   if (index >= 0 && index < e12_resistor_table_size) // Normal case
-    return e12_resistor_table[index]*scale;
+    {
+      return e12_resistor_table[index]*scale;
+    }
   else if(index < 0) // Negative index, get last resistor in previous decade
-    return e12_resistor_table[e12_resistor_table_size-1]*(scale/10);
+    {
+      return e12_resistor_table[e12_resistor_table_size-1]*(scale/10);
+    }
   else // Index too big, get first resistor in next decade
-    return e12_resistor_table[0]*scale*10;
+    {
+      return e12_resistor_table[0]*scale*10;
+    }
 }
 
 static int find_candidates(const float resistance, float* left_candidate, float* right_candidate)
@@ -37,7 +44,7 @@ static int find_candidates(const float resistance, float* left_candidate, float*
   const float scale = calculate_scaling(resistance);
   float e12_resistor = 0, relative_error = 0;
   int i;
-  for(i = 0; i < e12_resistor_table_size; ++i)
+  for(i = 0; i < e12_resistor_table_size+1; ++i)
     {
       e12_resistor = get_e12_resistor_value(i, scale);
       relative_error = (e12_resistor - resistance)/resistance;
@@ -85,6 +92,15 @@ static float sum_resistance(const float *e12_values, const int nb_of_resistors)
   return total_resistance;
 }
 
+static void set_other_candidates_to_zero(float *e12_values, const int nb_of_resistors)
+{
+  int node;
+  for(node = 0; node < nb_of_resistors; ++node)
+    {
+      e12_values[node] = 0;
+    }
+}
+
 static int calc_e12_values(const float resistance, float *e12_values, const int nb_of_resistors)
 {
   DEBUG_PRINT("Resistance: %f, Reistors to use: %d\n", resistance, nb_of_resistors);
@@ -126,13 +142,16 @@ static int calc_e12_values(const float resistance, float *e12_values, const int 
 	{
 	  e12_values[0] = left_candidate;
 	  DEBUG_PRINT("Chose left candidate: %f\n", left_candidate);
+	  used_resistors = used_resistors + 1;
 	}
       else
 	{
 	  e12_values[0] = right_candidate;
 	  DEBUG_PRINT("Chose right candidate: %f\n", right_candidate);
+	  set_other_candidates_to_zero(&(e12_values[1]), nb_of_resistors-1);
+	  used_resistors = 1;
 	}
-      return used_resistors + 1;
+      return used_resistors;
     }
 
   return -1;
