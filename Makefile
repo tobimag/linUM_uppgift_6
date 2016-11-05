@@ -11,6 +11,10 @@ BUILD = build
 LIB = lib
 BIN = bin
 
+# Installation paths
+USR_BIN = /usr/bin
+USR_LIB = /usr/lib
+
 # Lib Resistance definitions
 LIB_RESISTANCE_PATH = ./libresistance
 LIB_RESISTANCE_SO = libresistance.so
@@ -38,7 +42,21 @@ lib : $(LIB_RESISTANCE_SO) $(LIB_POWER_SO) $(LIB_COMPONENT_SO)
 
 all : $(LIB_RESISTANCE_SO) $(LIB_POWER_SO) $(LIB_COMPONENT_SO) $(ELECTROTEST_BIN)
 
-.PHONEY : clean
+.PHONY : install
+install : 
+	cp -f $(BIN)/$(ELECTROTEST_BIN) $(USR_BIN)
+	cp -f $(LIB)/$(LIB_RESISTANCE_SO) $(USR_LIB)
+	cp -f $(LIB)/$(LIB_POWER_SO) $(USR_LIB)
+	cp -f $(LIB)/$(LIB_COMPONENT_SO) $(USR_LIB)
+
+.PHONY : uninstall
+uninstall:
+	rm -f $(USR_BIN)/$(ELECTROTEST_BIN)
+	rm -f $(USR_LIB)/$(LIB_RESISTANCE_SO)
+	rm -f $(USR_LIB)/$(LIB_POWER_SO)
+	rm -f $(USR_LIB)/$(LIB_COMPONENT_SO)
+
+.PHONY : clean
 clean:
 	rm -rf $(BUILD) $(BIN) $(LIB)
 
