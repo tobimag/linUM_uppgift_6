@@ -36,11 +36,13 @@ ELECTROTEST_SRC = electrotest.c
 ELECTROTEST_BIN = electrotest
 ELECTROTEST_OBJ = electrotest.o
 
-VPATH = $(LIB) $(LIB_RESISTANCE_PATH) $(LIB_POWER_PATH) $(LIB_COMPONENT_PATH) $(ELECTROTEST_PATH) $(BUILD) $(BIN)
+VPATH = $(BIN) $(LIB) $(LIB_RESISTANCE_PATH) $(LIB_POWER_PATH) $(LIB_COMPONENT_PATH) $(ELECTROTEST_PATH) $(BUILD)
 
+.PHONEY : lib 
 lib : $(LIB_RESISTANCE_SO) $(LIB_POWER_SO) $(LIB_COMPONENT_SO)
 
-all : $(LIB_RESISTANCE_SO) $(LIB_POWER_SO) $(LIB_COMPONENT_SO) $(ELECTROTEST_BIN)
+.PHONEY : all
+all : $(LIB_RESISTANCE_SO) $(LIB_POWER_SO) $(LIB_COMPONENT_SO) $(BIN)/$(ELECTROTEST_BIN)
 
 .PHONY : install
 install : 
@@ -65,7 +67,10 @@ clean:
 	$(CC) -c $(CFLAGS) -fpic -o $(BUILD)/$(*:.c=.o) $^
 	$(CC) $(CFLAGS) -shared -o $(LIB)/$@ $(BUILD)/$(*:.c=.o)
 
-$(ELECTROTEST_BIN) : $(ELECTROTEST_SRC)
+$(BIN)/$(ELECTROTEST_BIN) : $(ELECTROTEST_OBJ)
 	$(MAKE_DIR) $(BIN)
+	$(CC) $(CFLAGS) -L$(LIB) -Wl,-rpath,../$(LIB) -o $@ $(BUILD)/$(ELECTROTEST_OBJ) -lresistance -lcomponent -lpower -lm
+
+$(ELECTROTEST_OBJ) : $(ELECTROTEST_SRC)
+	$(MAKE_DIR) $(BUILD)
 	$(CC) -c $(CFLAGS) -fpic $^ -o $(BUILD)/$@
-	$(CC) $(CFLAGS) -L$(LIB) -Wl,-rpath,../$(LIB) -o $(BIN)/$(ELECTROTEST_BIN) $(BUILD)/$(ELECTROTEST_OBJ) -lresistance -lcomponent -lpower -lm
