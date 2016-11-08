@@ -11,8 +11,7 @@ int main(){
   char conn;
   do{
     printf("Ange koppling[S|P]: ");
-    scanf("%c", &conn);
-    scanf("%c", &conn);
+    scanf(" %c", &conn);
     conn= toupper(conn);
   }while(conn!= 'S' && conn!= 'P');
 
