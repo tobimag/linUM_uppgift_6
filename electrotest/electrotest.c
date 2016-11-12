@@ -19,7 +19,7 @@ int main(){
   printf("Antal komponenter: ");
   scanf("%d", &count);
   
-  float array[count-1];
+  float array[count];
   for(int i= 0; i< count; i++){
     printf("Komponent %d i ohm: ", i+1);
     scanf("%f", &array[i]);
@@ -31,11 +31,11 @@ int main(){
   printf("Effekt %.2f W\n", calc_power_r(volt, orig_resistance ));
 
   printf("Ersättningsresistanser i E12-serien kopplade i serie:\n");
-  float res_array[2];
+  float res_array[3];
   e_resistance(orig_resistance, res_array);
   for(int i= 0; i< 3; i++)
     if(res_array[i] != 0)
-	printf("%.1f\n ", res_array[i]);
+	printf("%.1f\n", res_array[i]);
 
   return 0;
 }
