@@ -26,16 +26,16 @@ int main(){
   } 
 
   float orig_resistance= calc_resistance(count, conn, array);
-  printf("Ersättningsresistans: %.1f ohm\n", orig_resistance);
+  printf("Ersättningsresistans:\n%.1f ohm\n", orig_resistance);
 
-  printf("Effekt %.2f W\n", calc_power_r(volt, orig_resistance ));
+  printf("Effekt:\n%.2f W\n", calc_power_r(volt, orig_resistance ));
 
   printf("Ersättningsresistanser i E12-serien kopplade i serie:\n");
   float res_array[3];
   e_resistance(orig_resistance, res_array);
   for(int i= 0; i< 3; i++)
     if(res_array[i] != 0)
-	printf("%.1f\n", res_array[i]);
+	printf("%.0f\n", res_array[i]);
 
   return 0;
 }
