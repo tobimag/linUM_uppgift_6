@@ -46,10 +46,16 @@ all : $(LIB_RESISTANCE_SO) $(LIB_POWER_SO) $(LIB_COMPONENT_SO) $(BIN)/$(ELECTROT
 
 .PHONY : install
 install : all
-	cp -f $(BIN)/$(ELECTROTEST_BIN) $(USR_BIN)
+	# Gamla versionen
+	#cp -f $(BIN)/$(ELECTROTEST_BIN) $(USR_BIN)
+	#cp -f $(LIB)/$(LIB_RESISTANCE_SO) $(USR_LIB)
+	#cp -f $(LIB)/$(LIB_POWER_SO) $(USR_LIB)
+	#cp -f $(LIB)/$(LIB_COMPONENT_SO) $(USR_LIB)
+	# Nya: gör först biblioteken, sedan gör en ny electrotest som är rätt länkad?
 	cp -f $(LIB)/$(LIB_RESISTANCE_SO) $(USR_LIB)
 	cp -f $(LIB)/$(LIB_POWER_SO) $(USR_LIB)
-	cp -f $(LIB)/$(LIB_COMPONENT_SO) $(USR_LIB)
+	cp -f $(LIB)/$(LIB_COMPONENT_SO) $(USR_LIB)	
+	$(CC) $(CFLAGS) -L$(LIB) -Wl,-rpath,$(USR_LIB) -o $(USR_BIN)/$(ELECTROTEST_BIN) $(BUILD)/$(ELECTROTEST_OBJ) -lresistance -lcomponent -lpower -lm
 
 .PHONY : uninstall
 uninstall:
