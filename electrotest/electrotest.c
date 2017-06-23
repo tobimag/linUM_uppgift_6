@@ -3,26 +3,34 @@
 
 #include "electrotest.h"
 
-int main(){
+#include "unistd.h"
+
+int main() {
   float volt;
   printf("Ange spänningskälla i V: ");
   scanf("%f", &volt);
+  printf("%f\n", volt);
 
   char conn;
-  do{
+  do {
     printf("Ange koppling[S|P]: ");
     scanf(" %c", &conn);
     conn= toupper(conn);
-  }while(conn!= 'S' && conn!= 'P');
+    printf("%c\n", conn);
+  } 
+  while(conn!= 'S' && conn!= 'P');
 
-  int count;
-  printf("Antal komponenter: ");
+
+  int count = 3;
+  printf("Ange antal komponenter: ");
   scanf("%d", &count);
+  printf("%d\n", count);
   
   float array[count];
   for(int i= 0; i< count; i++){
-    printf("Komponent %d i ohm: ", i+1);
+    printf("Ange komponent %d i ohm: ", i+1);
     scanf("%f", &array[i]);
+    printf("%f\n", array[i]);
   } 
 
   float orig_resistance= calc_resistance(count, conn, array);

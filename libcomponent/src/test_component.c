@@ -1,10 +1,13 @@
-/* test_libcomponent.c */
+/*! \file test_component.c */
 
 #include <stdio.h>
 #include "libcomponent.h"
 
-const int NB_OF_RESISTORS = 3;
-
+/*! \brief Prints the result, i.e. the array of resistor values
+ *
+ *  \param[in] count is the size of the array, i.e. the number resistors to print
+ *  \param[in] res_array are the resistor values to print
+ */
 void print_result(const int count, const float *res_array)
 {
   printf("Used %d resistors: ", count);
@@ -25,7 +28,10 @@ int main(int argc, char* argv[])
       printf("Usage: %s <Resistance>\n", argv[0]);
       return 1;
     }
-  float res_array[NB_OF_RESISTORS];
+  
+  const unsigned int MAX_NUMBER_OF_RESISTORS = 3;
+  float res_array[MAX_NUMBER_OF_RESISTORS];
+
   float orig_resistance;
   sscanf(argv[1],"%f", &orig_resistance);
   int count = 0;

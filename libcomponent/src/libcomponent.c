@@ -1,4 +1,4 @@
-/* libcomponent.c */
+/*! \file libcomponent.c */
 
 #include <math.h>
 #include <stdio.h>
@@ -11,10 +11,18 @@
 #define DEBUG_PRINT
 #endif
 
-const int e12_resistor_table_size = 12;
-const float e12_resistor_table[12] = {1, 1.2, 1.5, 1.8, 2.2, 2.7, 3.3, 3.9, 4.7, 5.6, 6.8, 8.2};
-const float tolerance = 0.1;
+#define E12_RESISTOR_TABLE_SIZE 12
+#define TOLERANCE 0.1
 
+static const int e12_resistor_table_size = 12;
+static const float e12_resistor_table[E12_RESISTOR_TABLE_SIZE] = {1, 1.2, 1.5, 1.8, 2.2, 2.7, 3.3, 3.9, 4.7, 5.6, 6.8, 8.2};
+
+/*! calculate_scaling 
+ *  \brief Calculates the tenfold closest to the supplied resistance value
+ *
+ *  \param[in] resistance is the value of the resistance
+ *  \return the tenfold, i.e. the scaling 
+ */
 static float calculate_scaling(const float resistance)
 {
   const float exponent = floorf(log10f(resistance));
@@ -23,6 +31,18 @@ static float calculate_scaling(const float resistance)
   return scale;
 }
 
+/*! \brief Returns the value of the E12 resistor given by the index and the scale 
+ *
+ *  Turns the straight table of E12 resistor values into a circular, covering all decades.
+ *  The scale chooses which decade of E12 resistors that shall be used while the index
+ *  chooses the resistor in that decade. If the index is negative, the last resistor in
+ *  the previous decade is chosen. If the index is bigger than straight table, the first
+ *  resistor in the next decade is chosen. 
+ *
+ *  \param[in] index is the selector of a resistor, ignoring decade
+ *  \param[in] scale is the selector of decade
+ *  \return the value of the chosen resistory
+ */
 static float get_e12_resistor_value(const int index, const float scale)
 {
   if (index >= 0 && index < e12_resistor_table_size) // Normal case
@@ -39,6 +59,20 @@ static float get_e12_resistor_value(const int index, const float scale)
     }
 }
 
+/*! \brief Find one or two E12 resistors to replace the actual resistance
+ *
+ *  Given a resistance, find either one or two E12 resistors which are candidates
+ *  to replace the resistance. The first candidate will be in the left part of the
+ *  the tree and will be less than than the resistance. The second candidate will
+ *  be in the right part of three and wil lbe greater than the resistance. If a
+ *  match is found, i.e. a resistor exactly matching the resistance, this will be
+ *  the first (left) candidate and the right_candidate will be untouched. 
+ *
+ *  \param resistance is the actual resistance to replace
+ *  \param left_candidate is the E12 resistor in the left tree
+ *  \param right_candidate is the E12 resistor in the right tree
+ *  \return 0 if only candidate found, 1 if two candidates found, -1 if no canidates were found
+ */
 static int find_candidates(const float resistance, float* left_candidate, float* right_candidate)
 {
   const float scale = calculate_scaling(resistance);
@@ -50,7 +84,7 @@ static int find_candidates(const float resistance, float* left_candidate, float*
       relative_error = (e12_resistor - resistance)/resistance;
       DEBUG_PRINT("Resistor: %f | Error: %f\n", e12_resistor, relative_error);
       // We found something close
-      if(fabs(relative_error) < tolerance)
+      if(fabs(relative_error) < TOLERANCE)
 	{
 	  // We hit the motherload!
 	  if(relative_error == 0)
@@ -79,6 +113,12 @@ static int find_candidates(const float resistance, float* left_candidate, float*
   return -1;
 }
 
+/*! \brief Sums the value of a number of resistors
+ *
+ * \param e12_values are the resistor values to sum
+ * \param nb_of_resistors is how many values to sum
+ * \return the sum of the resistor values 
+ */
 static float sum_resistance(const float *e12_values, const int nb_of_resistors)
 {
   float total_resistance = 0;
@@ -92,19 +132,33 @@ static float sum_resistance(const float *e12_values, const int nb_of_resistors)
   return total_resistance;
 }
 
-static void set_other_candidates_to_zero(float *e12_values, const int nb_of_resistors)
+/*! \brief Sets all candidates to zero
+ *
+ * \param candidates is the candidates that shall be set to zero
+ * \param nb_of_resistors is the number of candidates
+ */
+static void set_other_candidates_to_zero(float *candidates, const int nb_of_resistors)
 {
   int node;
   for(node = 0; node < nb_of_resistors; ++node)
     {
-      e12_values[node] = 0;
+      candidates[node] = 0;
     }
 }
 
+/*! \brief Realize resistance with resistors from E12-series
+ *
+ *  Finds up given number of resistors from E12-series which closest replace
+ *  the original resistance.
+ *
+ *  \param[in] resistance is the resistance which should be replaced
+ *  \param[out] e12_values are the chosen resistors from E12-series
+ *  \param [in] nb_of_resistors is the maximum nubmer of resistors to use
+ *  \return the number of resistors used
+ */
 static int calc_e12_values(const float resistance, float *e12_values, const int nb_of_resistors)
 {
   DEBUG_PRINT("Resistance: %f, Reistors to use: %d\n", resistance, nb_of_resistors);
-  const float scale = calculate_scaling(resistance);
 
   float left_candidate = 0, right_candidate = 0;
   const int result = find_candidates(resistance, &left_candidate, &right_candidate);
